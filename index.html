@@ -383,6 +383,22 @@
             color: var(--orange-brand);
             font-size: 14px;
         }
+
+/* Flex wrapper to ensure iframe takes remaining space */
+#iframe-container {
+    flex-grow: 1;
+    margin-top: 15px;
+    display: flex;
+}
+
+/* Iframe taking 100% of the parent iframe-container */
+.signature-iframe {
+    width: 100%;
+    height: 100%;
+    border: 2px dashed #0056b3; /* Dashed border for signature area */
+    border-radius: 4px;
+    background-color: #ffffff;
+}
     </style>
 </head>
 <body>
@@ -505,10 +521,6 @@
                 <button type="submit" class="btn-confirm">Confirm</button>
             </div>
 
-            <div id="iframe-container">
-                <iframe id="signature-iframe" class="signature-iframe" src=""></iframe>
-                <button id="submit-button" disabled=true>Submit</button>
-            </div>
         </form>
 
 
@@ -536,6 +548,11 @@
                 <p><strong>Membership Terms and Conditions</strong></p><br>
                 <p>This agreement outlines your recurring commitment to our fitness classes. Payment of $159.00 will be auto-debited monthly on your billing anchor cycle. Cancellation must be processed according to home studio rules.</p><br>
                 <p>[You can add additional customized legal text or waiver forms inside this scrollable div container later as requested.]</p>
+
+
+              <div id="iframe-container">
+                <iframe id="signature-iframe" class="signature-iframe" src=""></iframe>
+              </div>
             </div>
 
             <div class="btn-container">
@@ -593,6 +610,8 @@
             setTimeout(function() {
                 // Hide loader
                 loader.style.display = 'none';
+
+                displayClickwrap();
                 
                 // Advance to Summary view
                 switchStep('checkoutForm', 'stepSummary');
@@ -973,7 +992,6 @@ function displayClickwrap() {
         });
 }
 
-displayClickwrap();
     </script>
 </body>
 </html>
