@@ -252,9 +252,18 @@
             transition: background-color 0.2s ease;
         }
 
-        .btn-confirm:hover {
-            background-color: var(--orange-hover);
-        }
+/* Hover State */
+.btn-confirm:hover:not(:disabled) {
+  background-color: var(--orange-hover);
+}
+
+/* Disabled State */
+.btn-confirm:disabled {
+  background-color: #E0E0E0;
+  color: #9E9E9E;
+  cursor: not-allowed;
+  pointer-events: none;
+}
 
         /* Loading Screen styles */
         .loading-overlay {
@@ -552,7 +561,7 @@
             </div>
 
             <div class="btn-container">
-                <button type="button" class="btn-confirm" onclick="goToSuccess()">Confirm</button>
+                <button type="button" id="signed-btn" class="btn-confirm" onclick="goToSuccess()" disabled>Confirm</button>
             </div>
         </div>
 
@@ -806,7 +815,7 @@ iframe.addEventListener("load", () => {
               break;
             case 'sign':
               // data has been set, clickwrap is loading within iframe
-              const submitButton = document.getElementById('submit-button');
+              const submitButton = document.getElementById('signed-btn');
               if (submitButton) {
                 submitButton.disabled = false;
               }
