@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Membership Checkout Flow</title>
+    <style>
+        :root {
+            --bg-color: #F9F5EB;
+            --orange-brand: #FF7920;
+            --orange-hover: #E05E1A;
+            --text-dark: #1A1A1A;
+            --text-muted: #666666;
+            --input-bg-grey: #EAEFF5;
+            --input-bg-white: #FFFFFF;
+            --border-color: #A0A0A0;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            background-color: transparent;
+        }
+
+        /* Utility Classes for Steps */
+        .step {
+            display: none;
+        }
+        .step.active {
+            display: block;
+        }
+
+        /* Typography & Headings */
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin: 25px 0 15px 0;
+            color: var(--text-dark);
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        /* Pricing Card Styles */
+        .pricing-card {
+            background-color: var(--orange-brand);
+            color: #FFFFFF;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .pricing-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .pricing-title {
+            font-size: 26px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .info-icon {
+            font-size: 14px;
+            border: 2px solid #FFFFFF;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .pricing-price {
+            font-size: 32px;
+            font-weight: 800;
+        }
+        .pricing-price span {
+            font-size: 14px;
+            font-weight: normal;
+        }
+
+        .pricing-features {
+            list-style: none;
+            margin-bottom: 20px;
+        }
+
+        .pricing-features li {
+            font-size: 14px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .pricing-features li::before {
+            content: "✓";
+            font-weight: bold;
+            border: 1px solid #FFFFFF;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10px;
+        }
+
+        .divider {
+            border-top: 1px solid rgba(255, 255, 255, 0.4);
+            margin: 15px 0;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .price-row.total {
+            font-size: 24px;
+            font-weight: 800;
+            margin-top: 10px;
+        }
+
+        .start-date {
+            font-size: 12px;
+            margin-top: 5px;
+            opacity: 0.9;
+        }
+
+        /* Terms Checkbox Block */
+        .terms-container {
+            background: #FFFFFF;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 15px;
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .terms-container input[type="checkbox"] {
+            margin-top: 3px;
+            transform: scale(1.2);
+            accent-color: var(--orange-brand);
+        }
+
+        .terms-container label {
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--text-dark);
+        }
+
+        .terms-container a {
+            color: var(--text-dark);
+            text-decoration: underline;
+        }
+
+        /* Form Controls Styling */
+        .form-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .form-group {
+            flex: 1;
+            position: relative;
+            background-color: var(--input-bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 6px 12px;
+        }
+
+        /* Top fields use grey background styling based on image */
+        .grey-input {
+            background-color: var(--input-bg-grey);
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: none;
+            margin-bottom: 2px;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 15px;
+            color: var(--text-dark);
+            outline: none;
+            padding: 2px 0;
+        }
+
+        .form-group select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%23A0A0A0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+            background-repeat: no-repeat;
+            background-position: right 5px center;
+        }
+
+        /* Action Button */
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 25px;
+        }
+
+        .btn-confirm {
+            background-color: var(--orange-brand);
+            color: #FFFFFF;
+            border: none;
+            padding: 12px 60px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-confirm:hover {
+            background-color: var(--orange-hover);
+        }
+
+        /* Loading Screen styles */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-color);
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 121, 32, 0.2);
+            border-top: 5px solid var(--orange-brand);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--orange-brand);
+        }
+
+        /* Summary Page Styles */
+        .summary-box {
+            background: #FFFFFF;
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            margin-top: 15px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #EAEAEA;
+            font-size: 14px;
+        }
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+        .summary-label {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+        .summary-value {
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        /* Review / Agreement Layout */
+        .orange-line {
+            height: 4px;
+            background-color: var(--orange-brand);
+            width: 100%;
+            margin: 15px 0;
+        }
+
+        .agreement-box {
+            background-color: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            height: 200px;
+            overflow-y: scroll;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        /* Success Page Layout */
+        .success-container {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .logo-placeholder {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--orange-brand);
+            letter-spacing: -0.5px;
+            margin-bottom: 30px;
+        }
+        .logo-placeholder span {
+            font-weight: 300;
+            font-size: 14px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: -5px;
+        }
+
+        .success-title {
+            font-size: 28px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+        }
+
+        .success-text {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            max-width: 400px;
+            margin: 0 auto 30px auto;
+        }
+
+        .app-mock {
+            margin-top: 20px;
+            font-weight: bold;
+            color: var(--orange-brand);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loadingScreen" class="loading-overlay">
+        <div class="spinner"></div>
+        <div class="loading-text">Processing Submission...</div>
+    </div>
+
+    <div class="container">
+
+        <form id="checkoutForm" class="step active" onsubmit="handleFormSubmit(event)">
+            <div class="pricing-card">
+                <div class="pricing-header">
+                    <div class="pricing-title">Premier <span class="info-icon">i</span></div>
+                    <div class="pricing-price">$159<span>/mo.</span></div>
+                </div>
+                <ul class="pricing-features">
+                    <li>Unlimited Classes</li>
+                    <li>Available to new members only</li>
+                </ul>
+                <div class="divider"></div>
+                <div class="price-row">
+                    <span>Subtotal</span>
+                    <span>$159.00</span>
+                </div>
+                <div class="price-row">
+                    <span>Taxes</span>
+                    <span>$0.00</span>
+                </div>
+                <div class="divider"></div>
+                <div class="price-row total">
+                    <span>Total Payment</span>
+                    <span>$159.00</span>
+                </div>
+                <div class="start-date">Membership starts on March 10, 2025</div>
+            </div>
+
+            <div class="terms-container">
+                <input type="checkbox" id="termsCheckbox" required>
+                <label for="termsCheckbox">
+                    I understand & agree that this is a recurring membership which renews automatically at the price and frequency shown immediately above. I can cancel anytime <a href="#">here</a> or in-person at my home studio.
+                </label>
+            </div>
+
+            <h2>Member Contact</h2>
+            <div class="form-row">
+                <div class="form-group grey-input">
+                    <label>First Name</label>
+                    <input type="text" id="firstName" value="Arya" required>
+                </div>
+                <div class="form-group grey-input">
+                    <label>Last Name</label>
+                    <input type="text" id="lastName" value="Stark" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group grey-input">
+                    <label>Phone Number</label>
+                    <input type="tel" id="phoneNumber" value="+1 234-567-8901" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group grey-input">
+                    <label>Email</label>
+                    <input type="email" id="email" value="janica+02212025@outliant.com" required>
+                </div>
+            </div>
+
+            <h2>Credit Card Details</h2>
+            <div class="form-row">
+                <div class="form-group grey-input">
+                    <label>Card Type</label>
+                    <input type="text" id="cardType" value="AMEX" required>
+                </div>
+                <div class="form-group grey-input">
+                    <label>Last 4 Digits of Card</label>
+                    <input type="text" id="cardDigits" value="2736" maxlength="4" required>
+                </div>
+            </div>
+
+            <h2>Member Address</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Street Address</label>
+                    <input type="text" id="streetAddress" value="2 Homestead Dr." required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>City</label>
+                    <input type="text" id="city" value="Northridge" required>
+                </div>
+                <div class="form-group">
+                    <label>State</label>
+                    <select id="state" required>
+                        <option value="California" selected>California</option>
+                        <option value="New York">New York</option>
+                        <option value="Texas">Texas</option>
+                        <option value="Florida">Florida</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Zip Code</label>
+                    <input type="text" id="zipCode" value="53201" required>
+                </div>
+                <div class="form-group">
+                    <label>Country</label>
+                    <select id="country" required>
+                        <option value="United States" selected>United States</option>
+                        <option value="Canada">Canada</option>
+                        <option value="United Kingdom">United Kingdom</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="btn-container">
+                <button type="submit" class="btn-confirm">Confirm</button>
+            </div>
+
+            <div id="iframe-container">
+                <iframe id="signature-iframe" class="signature-iframe" src=""></iframe>
+                <button id="submit-button" disabled=true>Submit</button>
+            </div>
+        </form>
+
+
+        <div id="stepSummary" class="step">
+            <h2>Review Your Details</h2>
+            <div class="summary-box">
+                <div class="summary-item"><span class="summary-label">Name:</span> <span id="sumName" class="summary-value"></span></div>
+                <div class="summary-item"><span class="summary-label">Phone:</span> <span id="sumPhone" class="summary-value"></span></div>
+                <div class="summary-item"><span class="summary-label">Email:</span> <span id="sumEmail" class="summary-value"></span></div>
+                <div class="summary-item"><span class="summary-label">Payment method:</span> <span id="sumCard" class="summary-value"></span></div>
+                <div class="summary-item"><span class="summary-label">Address:</span> <span id="sumAddress" class="summary-value"></span></div>
+            </div>
+            <div class="btn-container">
+                <button type="button" class="btn-confirm" onclick="goToAgreement()">Confirm</button>
+            </div>
+        </div>
+
+
+        <div id="stepAgreement" class="step">
+            <h2>Review</h2>
+            <h3>Agreement</h3>
+            <div class="orange-line"></div>
+            
+            <div class="agreement-box">
+                <p><strong>Membership Terms and Conditions</strong></p><br>
+                <p>This agreement outlines your recurring commitment to our fitness classes. Payment of $159.00 will be auto-debited monthly on your billing anchor cycle. Cancellation must be processed according to home studio rules.</p><br>
+                <p>[You can add additional customized legal text or waiver forms inside this scrollable div container later as requested.]</p>
+            </div>
+
+            <div class="btn-container">
+                <button type="button" class="btn-confirm" onclick="goToSuccess()">Confirm</button>
+            </div>
+        </div>
+
+
+        <div id="stepSuccess" class="step">
+            <div class="success-container">
+                <div class="logo-placeholder">orangetheory <span>fitness</span></div>
+                <h1 class="success-title">Congrats! Welcome to the Family.</h1>
+                <p class="success-text">
+                    Please check your email for your copy of the signed agreement and <span style="color:var(--orange-brand); font-weight:bold;">download the OTF mobile app</span> to book your first class.
+                </p>
+                <p class="success-text">See you soon!</p>
+                
+                <div class="orange-line" style="width: 60px; margin: 20px auto;"></div>
+                <p class="app-mock">Check Your Progress Using the App.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Handle Form Submission and Trigger 2.5s Loader
+        function handleFormSubmit(event) {
+            event.preventDefault(); // Prevent standard page reload
+
+            // Show loading animation overlay
+            const loader = document.getElementById('loadingScreen');
+            loader.style.display = 'flex';
+
+            // Extract data from form elements
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const phone = document.getElementById('phoneNumber').value;
+            const email = document.getElementById('email').value;
+            const cardType = document.getElementById('cardType').value;
+            const cardDigits = document.getElementById('cardDigits').value;
+            const street = document.getElementById('streetAddress').value;
+            const city = document.getElementById('city').value;
+            const state = document.getElementById('state').value;
+            const zip = document.getElementById('zipCode').value;
+            const country = document.getElementById('country').value;
+
+            // Populate Summary Elements
+            document.getElementById('sumName').innerText = firstName + ' ' + lastName;
+            document.getElementById('sumPhone').innerText = phone;
+            document.getElementById('sumEmail').innerText = email;
+            document.getElementById('sumCard').innerText = cardType + ' ending in ' + cardDigits;
+            document.getElementById('sumAddress').innerText = `${street}, ${city}, ${state} ${zip}, ${country}`;
+
+            // Wait exactly 2.5 seconds (2500 milliseconds) before transitioning
+            setTimeout(function() {
+                // Hide loader
+                loader.style.display = 'none';
+                
+                // Advance to Summary view
+                switchStep('checkoutForm', 'stepSummary');
+            }, 2500);
+        }
+
+        // Navigate from Summary View to Agreement View
+        function goToAgreement() {
+            switchStep('stepSummary', 'stepAgreement');
+        }
+
+        // Navigate from Agreement View to Success View
+        function goToSuccess() {
+            switchStep('stepAgreement', 'stepSuccess');
+        }
+
+        // Helper function to manage active view classes
+        function switchStep(currentId, nextId) {
+            document.getElementById(currentId).classList.remove('active');
+            document.getElementById(nextId).classList.add('active');
+            window.scrollTo(0, 0); // Reset scroll position to top
+        }
+
+
+const CLICKWRAP_IFRAME_ORIGIN = 'https://demo.ironcladapp.com';
+
+const WORKFLOW_TEMPLATE_ID = '69386161699f133d77ff9959';
+
+var CLICKWRAP_ACCEPTED = false;
+
+function sendIframeMessage(messageData) {
+  const iframeInPage = document.getElementById('my-iframe');
+  if (iframeInPage == null) {
+    console.error('Unable to find iframe in page');
+    return;
+  }
+  iframeInPage.contentWindow.postMessage(messageData, CLICKWRAP_IFRAME_ORIGIN);
+};
+
+function handleCWMessage(message) {
+  if (message.origin !== CLICKWRAP_IFRAME_ORIGIN) {
+    return;
+  }
+
+  switch (message.data.type) {
+    case 'clickwrap_initialized':
+      // loaded, can now set data
+      console.log("initialized");
+      sendIframeMessage({
+          type: 'set_data',
+          data: {
+              formValues: {
+                  counterpartyName: 'Example Counterparty',
+              },
+      styles: {
+        //checkbox: {
+        //  uncheckedBorderColor: "#007490",
+        //  uncheckedBackgroundColor: "#F8F8F7",
+        //  checkedBackgroundColor: "#00A66F",
+        //  checkmarkColor: "lavender",
+        //},
+        backgroundColor: "transparent", // default value - shown for structure
+        acceptanceLanguageText: {
+          fontSize: "12px",
+          //color: "#00a66f",
+          //fontWeight: "500",
+          fontFamily: {
+            type: "google",
+            fontFamilyName: "Open Sans",
+          },
+          fontStyle: "normal", // default value - shown for structure
+          textDecoration: undefined, // default value - shown for structure
+        },
+        documentLink: {
+          //color: "#006c47",
+          //fontWeight: "600",
+          fontFamily: {
+            type: "google",
+            fontFamilyName: "Open Sans",
+          },
+          fontStyle: "normal", // default value - shown for structure
+          fontSize: "12px" // value inherited from acceptanceLanguageText.fontSize - shown for structure
+        },
+      },
+      },
+          workflowTemplateId: WORKFLOW_TEMPLATE_ID
+      });
+      break;
+    case 'clickwrap_is_loading':
+      // data has been set, clickwrap is loading within iframe
+      console.log("is loading");
+      break;
+    case 'clickwrap_load_succeeded':
+      // clickwrap is loaded and is now interactable
+      console.log("load succeeded");
+      break;
+    case 'clickwrap_load_failed':
+      // clickwrap loading failed, check data and try setting data again
+      // clickwrap loading failed will post if any invalid style property is provided
+      console.log("load failed");
+      break;
+    case 'clickwrap_link_clicked':
+      // notification that the user has downloaded a clickwrap document
+      console.log("link clicked");
+      break;
+    case 'clickwrap_checkbox_checked':
+      // The user has checked the checkbox for acceptance.
+      // If this is a required part of your user flow, other dependent actions,
+      // e.g. a form submit button, can now be enabled.
+      // Update your app state accordingly.
+      // It is now permissable to post the `send_acceptance` event to the iframe.
+      console.log("checkbox checked");
+      CLICKWRAP_ACCEPTED = true;
+      sendIframeMessage({
+          type: 'set_data',
+          data: {
+              formValues: {
+                  counterpartyName: document.getElementById("email-address").value.trim() ?? null,
+                  counterpartySignerName: document.getElementById("email-address").value.trim() ?? null,
+                  counterpartySignerEmail: document.getElementById("email-address").value.trim() ?? null,
+                  dataVendor: document.getElementById("data-vendor").value.trim() ?? null,
+              },
+      styles: {
+        //checkbox: {
+        //  uncheckedBorderColor: "#007490",
+        //  uncheckedBackgroundColor: "#F8F8F7",
+        //  checkedBackgroundColor: "#00A66F",
+        //  checkmarkColor: "lavender",
+        //},
+        backgroundColor: "transparent", // default value - shown for structure
+        acceptanceLanguageText: {
+          fontSize: "12px",
+          //color: "#00a66f",
+          //fontWeight: "500",
+          fontFamily: {
+            type: "google",
+            fontFamilyName: "Open Sans",
+          },
+          fontStyle: "normal", // default value - shown for structure
+          textDecoration: undefined, // default value - shown for structure
+        },
+        documentLink: {
+          //color: "#006c47",
+          //fontWeight: "600",
+          fontFamily: {
+            type: "google",
+            fontFamilyName: "Open Sans",
+          },
+          fontStyle: "normal", // default value - shown for structure
+          fontSize: "12px" // value inherited from acceptanceLanguageText.fontSize - shown for structure
+        },
+      },
+      },
+          workflowTemplateId: WORKFLOW_TEMPLATE_ID
+      });
+      sendIframeMessage({
+        type: "send_acceptance",
+        workflowTemplateId: WORKFLOW_TEMPLATE_ID,
+      });
+      break;
+    case 'clickwrap_checkbox_unchecked':
+      // The user has previously checked the checkbox for acceptance,
+      // but has now unchecked the box.
+      // If this is a required part of your user flow, other dependent actions,
+      // e.g. a form submit button, can now be disabled.
+      // Update your app state accordingly.
+      CLICKWRAP_ACCEPTED = false;
+      console.log("checkbox unchecked");
+      break;
+    case 'clickwrap_acceptance_succceeded':
+      // The acceptance has been successfully sent and recorded.
+      console.log("acceptance succeeded");
+      break;
+    case 'clickwrap_acceptance_failed':
+      // The acceptance was not successfully sent and recorded.
+      console.log("acceptance failed");
+      break;
+    default:
+      console.error('invalid message', { message });
+  }
+}
+
+/*
+const iframe = document.getElementById('my-iframe');
+iframe.addEventListener("load", () => {
+  window.addEventListener("message", handleCWMessage);
+});
+*/
+
+        function handleMessage(message) {
+          console.log(message);
+          switch (message.data.type) {
+            case 'load':
+              // loaded, can now set data
+              console.log("signature iframe loaded");
+              break;
+            case 'sign':
+              // data has been set, clickwrap is loading within iframe
+              const submitButton = document.getElementById('submit-button');
+              if (submitButton) {
+                submitButton.disabled = false;
+              }
+              break;
+            default:
+              console.error('invalid message', { message });
+              break;
+          }
+        }
+        /**
+         * Starts the loading animation and message rotation.
+         */
+        function startLoading(loadingContainer, loadingMessage) {
+            if (!loadingContainer || !loadingMessage) {
+                console.error("Loading elements not found!");
+                return;
+            }
+            const progressBar = document.getElementById('progress-bar');
+
+            const totalDuration = 9500; // 9.5 seconds
+            const updateFrequency = 50;  // Update every 50ms for a smooth look
+            const increment = (updateFrequency / totalDuration) * 100; // Calculate the percentage to add each update
+            let progress = 0;
+            
+            // Reset progress to 0 at the start
+            progressBar.style.width = '0%';
+            
+            // Animate the bar width steadily
+            progressInterval = setInterval(() => {
+                progress += increment;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(progressInterval); // Stop when it reaches 100%
+                }
+                progressBar.style.width = progress + '%';
+            }, updateFrequency);
+
+            // Make the container visible with a fade-in effect by adding the 'show' class
+            loadingContainer.classList.add('show');
+
+            // Fun rotating loading messages
+            const messages = [
+                "Dotting the i's and crossing the t's...",
+                "Finalizing the legal magic...",
+                "Summoning the contract gods...",
+                "Making it official, just like in the movies!",
+                "Printing... just kidding, it's all digital!"
+            ];
+            let index = 0;
+
+            // Set the first message immediately
+            loadingMessage.innerText = messages[index];
+            index = (index + 1) % messages.length;
+
+            // Set an interval to cycle through the messages
+            const messageInterval = setInterval(() => {
+                // 1. Add fade-out class to hide the current message
+                loadingMessage.classList.add('fade-out');
+
+                // 2. Wait for the fade-out animation to finish
+                setTimeout(() => {
+                    // 3. Change the text content
+                    loadingMessage.innerText = messages[index];
+                    // 4. Remove the fade-out class to trigger the fade-in
+                    loadingMessage.classList.remove('fade-out');
+
+                    index = (index + 1) % messages.length;
+                }, 500); // This time MUST match the CSS transition duration
+
+            }, 4000); // Changes every 4 seconds
+
+            // Example of how to stop the loading screen after some time
+            // In a real app, you would call stopLoading() after your data has loaded.
+            //setTimeout(() => stopLoading(messageInterval), 20000); 
+        }
+
+        /**
+         * Stops the loading animation and hides the container.
+         * @param {number} intervalId - The ID of the interval to clear.
+         */
+        function stopLoading(loadingContainer) {
+            if (loadingContainer) {
+                loadingContainer.classList.remove('show');
+            }
+            //clearInterval(intervalId); // Important: stop the message rotation
+        }
+
+function displayClickwrap() {
+  console.log("hello");
+
+  const elementsToRemove = document.querySelectorAll('.ant-card-body');
+  elementsToRemove.forEach(function(element) {
+    element.remove();
+  });
+  
+    const signatureIframe = document.getElementById('signature-iframe');
+        if (signatureIframe) {
+            signatureIframe.addEventListener("load", () => {
+              window.addEventListener("message", handleMessage);
+            });
+            console.log("iframe loaded");
+        } else {
+            console.log("iframe not yet loaded");
+        }
+    const loadingContainer = document.getElementById('loading-container');
+    const loadingMessage = document.getElementById('loading-message');
+    //startLoading(loadingContainer, loadingMessage);
+
+   fetch("https://customer-demo-embedded-sign-trigger-999146514905.us-west1.run.app", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                attributes: {
+                    dataVendor: 'test',
+                    role699edbec23d5480b9012b2e42872ddc6: "Jason Test",
+                    role32f73a669e5e42a3923d4d6c5d8bd12e: 'jason.brown@ironcladhq.com',
+                    counterpartyName: "Jason Test",
+                },
+                user: "jason.brown@ironcladhq.com",
+                templateId: "693858cdc16bd0393afebab1",
+                frameAncestor: "https://sets-demo.github.io/", // leave this as is
+                roleName: "Counterparty Signer",
+                clientId: "04a4ce29-bb03-4b11-a29b-1d64aa9e4078",
+                clientSecret: "f5645cd6-3414-4869-a574-4b0174400547",
+                baseUrl: "demo.ironcladapp.com",
+            }),
+        })
+        .then(response => {
+            // Check if the response is successful (status in the range 200-299)
+            // If not, it throws an error which will be caught by the .catch() block
+            if (!response.ok) {
+                // We throw an error here to be caught by the .catch() block later.
+                // We're also trying to parse the response as text to get more error details.
+                return response.text().then(text => { throw new Error(text || 'Network response was not ok') });
+            }
+            // If the response is ok, parse it as JSON. This returns another promise.
+            return response.json();
+        })
+        .then(responseJSON => {
+            // This block executes when the response.json() promise resolves successfully
+            const signatureUrl = responseJSON.url;
+            console.log("Signature URL found:", signatureUrl);
+
+            // Stop rotating messages & display the contract
+            //clearInterval(messageInterval);
+            signatureIframe.src = signatureUrl;
+
+            /*
+            // Hide the loading container and show the iframe container
+            if (loadingContainer) {
+                loadingContainer.style.display = "none";
+            }
+            */
+            stopLoading(loadingContainer);
+            const iframeContainer = document.getElementById('iframe-container');
+            if (iframeContainer) {
+                iframeContainer.style.display = "flex";
+            }
+        })
+        .catch(error => {
+            // This block catches any errors from the fetch call, the response check, or JSON parsing.
+            // Using a less disruptive UI element than alert() is recommended for displaying errors.
+            console.error("Script error:", error);
+            alert(`Error: ${error.message}`);
+            
+            /*
+            // It's good practice to stop the loading indicator on error as well
+            clearInterval(messageInterval);
+             if (loadingContainer) {
+                loadingContainer.style.display = "none";
+             }
+             if(loadingMessage){
+                loadingMessage.innerText = "Sorry, something went wrong. Please try again."
+             }
+            */
+            stopLoading(loadingContainer);
+        });
+}
+
+displayClickwrap();
+    </script>
+</body>
+</html>
